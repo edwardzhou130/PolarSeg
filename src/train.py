@@ -52,7 +52,6 @@ def main(args):
     compression_model = args.grid_size[2]
     grid_size = args.grid_size
     pytorch_device = torch.device('cuda:0')
-    print(grid_size)
     model = args.model
     if model == 'polar':
         fea_dim = 9

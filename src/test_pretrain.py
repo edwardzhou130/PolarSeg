@@ -58,7 +58,6 @@ def main(args):
     compression_model = args.grid_size[2]
     grid_size = args.grid_size
     pytorch_device = torch.device('cuda:0')
-    print(grid_size)
     model = args.model
     if model == 'polar':
         fea_dim = 9
@@ -122,7 +121,6 @@ def main(args):
             predict_labels = predict_labels.cpu().detach().numpy()
             for count,i_val_grid in enumerate(val_grid):
                 hist_list.append(fast_hist_crop(predict_labels[count,val_grid[count][:,0],val_grid[count][:,1],val_grid[count][:,2]],val_pt_labs[count],unique_label))
-            val_loss_list.append(loss.detach().cpu().numpy())
             pbar.update(1)
     iou = per_class_iu(sum(hist_list))
     print('per class iou: ')
