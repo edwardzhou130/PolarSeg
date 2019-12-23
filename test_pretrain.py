@@ -9,6 +9,7 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 
+from network.BEV_Unet import BEV_Unet
 from network.ptBEV import ptBEVnet
 from dataloader.dataset import collate_fn_BEV,collate_fn_BEV_test,SemKITTI,SemKITTI_label_name,spherical_dataset,voxel_dataset
 #ignore weird np warning
@@ -61,17 +62,17 @@ def main(args):
     model = args.model
     if model == 'polar':
         fea_dim = 9
-        from network.BEV_Unet_circular import BEV_Unet
+        circular_padding = True
     elif model == 'traditional':
         fea_dim = 7
-        from network.BEV_Unet import BEV_Unet
+        circular_padding = False
 
     #prepare miou fun
     unique_label=np.asarray(sorted(list(SemKITTI_label_name.keys())))[1:] - 1
     unique_label_str=[SemKITTI_label_name[x] for x in unique_label+1]
 
     #prepare model
-    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model,input_batch_norm = True,dropout = 0.5)
+    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding)
     my_model = ptBEVnet(my_BEV_model, pt_model = 'pointnet', grid_size =  grid_size, fea_dim = fea_dim, max_pt_per_encode = 256,
                             out_pt_fea_dim = 512, kernal_size = 1, pt_selection = 'random', fea_compre = compression_model)
     if os.path.exists(model_save_path):
@@ -99,6 +100,9 @@ def main(args):
                                                     num_workers = 4)
 
     # validation
+    print('*'*80)
+    print('Test network perfomance on validation split')
+    print('*'*80)
     pbar = tqdm(total=len(val_dataset_loader))
     my_model.eval()
     hist_list = []
@@ -123,17 +127,20 @@ def main(args):
                 hist_list.append(fast_hist_crop(predict_labels[count,val_grid[count][:,0],val_grid[count][:,1],val_grid[count][:,2]],val_pt_labs[count],unique_label))
             pbar.update(1)
     iou = per_class_iu(sum(hist_list))
-    print('per class iou: ')
+    print('Validation per class iou: ')
     for class_name, class_iou in zip(unique_label_str,iou):
         print('%s : %.2f%%' % (class_name, class_iou*100))
     val_miou = np.nanmean(iou) * 100
     del val_vox_label,val_grid,val_pt_fea,val_grid_ten
     pbar.close()
-    print('\nCurrent val miou is %.3f ' % val_miou)
+    print('Current val miou is %.3f ' % val_miou)
     print('Inference time per %d is %.4f seconds\n' %
         (test_batch_size,np.mean(time_list)))
     
     # test
+    print('*'*80)
+    print('Generate predictions for test split')
+    print('*'*80)
     pbar = tqdm(total=len(test_dataset_loader))
     for i_iter_test,(_,_,test_grid,_,test_pt_fea,test_index) in enumerate(test_dataset_loader):
         #predict
@@ -162,15 +169,15 @@ def main(args):
         pbar.update(1)
     del test_grid,test_pt_fea,test_index
     pbar.close()
-    print('\n Predicted test labels are saved in %s. Need to be shifted to original label format before submitting to the Competition website.')
-    print('\n Remap script can be found in semantic-kitti-api.')
+    print('Predicted test labels are saved in %s. Need to be shifted to original label format before submitting to the Competition website.' % output_path)
+    print('Remap script can be found in semantic-kitti-api.')
 
 if __name__ == '__main__':
     # Testing settings
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-d', '--data_dir', default='../data/SemKITTI')
-    parser.add_argument('-p', '--model_save_path', default='./SemKITTI_PolarSeg.pt')
-    parser.add_argument('-o', '--test_output_path', default='../out/SemKITTI_test')
+    parser.add_argument('-d', '--data_dir', default='data/SemKITTI')
+    parser.add_argument('-p', '--model_save_path', default='pretained_weight/SemKITTI_PolarSeg.pt')
+    parser.add_argument('-o', '--test_output_path', default='out/SemKITTI_test')
     parser.add_argument('-m', '--model', choices=['polar','traditional'], default='polar', help='training model: polar or traditional (default: polar)')
     parser.add_argument('-s', '--grid_size', nargs='+', type=int, default = [480,360,32], help='grid size of BEV representation (default: [480,360,32])')
     parser.add_argument('--test_batch_size', type=int, default=1, help='batch size for training (default: 1)')

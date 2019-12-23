@@ -9,6 +9,7 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 
+from network.BEV_Unet import BEV_Unet
 from network.ptBEV import ptBEVnet
 from dataloader.dataset import collate_fn_BEV,SemKITTI,SemKITTI_label_name,spherical_dataset,voxel_dataset
 from network.lovasz_losses import lovasz_softmax
@@ -55,17 +56,17 @@ def main(args):
     model = args.model
     if model == 'polar':
         fea_dim = 9
-        from network.BEV_Unet_circular import BEV_Unet
+        circular_padding = True
     elif model == 'traditional':
         fea_dim = 7
-        from network.BEV_Unet import BEV_Unet
+        circular_padding = False
 
     #prepare miou fun
     unique_label=np.asarray(sorted(list(SemKITTI_label_name.keys())))[1:] - 1
     unique_label_str=[SemKITTI_label_name[x] for x in unique_label+1]
 
     #prepare model
-    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model,input_batch_norm = True,dropout = 0.5)
+    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding)
     my_model = ptBEVnet(my_BEV_model, pt_model = 'pointnet', grid_size =  grid_size, fea_dim = fea_dim, max_pt_per_encode = 256,
                             out_pt_fea_dim = 512, kernal_size = 1, pt_selection = 'random', fea_compre = compression_model)
     if os.path.exists(model_save_path):
@@ -129,7 +130,7 @@ def main(args):
                         val_loss_list.append(loss.detach().cpu().numpy())
                 my_model.train()
                 iou = per_class_iu(sum(hist_list))
-                print('per class iou: ')
+                print('Validation per class iou: ')
                 for class_name, class_iou in zip(unique_label_str,iou):
                     print('%s : %.2f%%' % (class_name, class_iou*100))
                 val_miou = np.nanmean(iou) * 100
@@ -140,7 +141,7 @@ def main(args):
                     best_val_miou=val_miou
                     torch.save(my_model.state_dict(), model_save_path)
 
-                print('\nCurrent val miou is %.3f while the best val miou is %.3f' %
+                print('Current val miou is %.3f while the best val miou is %.3f' %
                     (val_miou,best_val_miou))
                 print('Current val loss is %.3f' %
                     (np.mean(val_loss_list)))
@@ -180,7 +181,7 @@ def main(args):
 if __name__ == '__main__':
     # Training settings
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-d', '--data_dir', default='../data/SemKITTI')
+    parser.add_argument('-d', '--data_dir', default='data/SemKITTI')
     parser.add_argument('-p', '--model_save_path', default='./SemKITTI_PolarSeg.pt')
     parser.add_argument('-m', '--model', choices=['polar','traditional'], default='polar', help='training model: polar or traditional (default: polar)')
     parser.add_argument('-s', '--grid_size', nargs='+', type=int, default = [480,360,32], help='grid size of BEV representation (default: [480,360,32])')
