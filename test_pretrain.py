@@ -101,7 +101,7 @@ def main(args):
 
     # validation
     print('*'*80)
-    print('Test network perfomance on validation split')
+    print('Test network performance on validation split')
     print('*'*80)
     pbar = tqdm(total=len(val_dataset_loader))
     my_model.eval()
@@ -175,7 +175,7 @@ def main(args):
 if __name__ == '__main__':
     # Testing settings
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-d', '--data_dir', default='data/SemKITTI')
+    parser.add_argument('-d', '--data_dir', default='data')
     parser.add_argument('-p', '--model_save_path', default='pretained_weight/SemKITTI_PolarSeg.pt')
     parser.add_argument('-o', '--test_output_path', default='out/SemKITTI_test')
     parser.add_argument('-m', '--model', choices=['polar','traditional'], default='polar', help='training model: polar or traditional (default: polar)')
