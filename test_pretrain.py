@@ -67,11 +67,11 @@ def main(args):
         fea_dim = 7
         circular_padding = False
 
-    #prepare miou fun
+    # prepare miou fun
     unique_label=np.asarray(sorted(list(SemKITTI_label_name.keys())))[1:] - 1
     unique_label_str=[SemKITTI_label_name[x] for x in unique_label+1]
 
-    #prepare model
+    # prepare model
     my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding)
     my_model = ptBEVnet(my_BEV_model, pt_model = 'pointnet', grid_size =  grid_size, fea_dim = fea_dim, max_pt_per_encode = 256,
                             out_pt_fea_dim = 512, kernal_size = 1, pt_selection = 'random', fea_compre = compression_model)
@@ -79,7 +79,7 @@ def main(args):
         my_model.load_state_dict(torch.load(model_save_path))
     my_model.to(pytorch_device)
 
-    #prepare dataset
+    # prepare dataset
     test_pt_dataset = SemKITTI(data_path + '/sequences/', imageset = 'test', return_ref = True)
     val_pt_dataset = SemKITTI(data_path + '/sequences/', imageset = 'val', return_ref = True)
     if model == 'polar':
@@ -143,7 +143,7 @@ def main(args):
     print('*'*80)
     pbar = tqdm(total=len(test_dataset_loader))
     for i_iter_test,(_,_,test_grid,_,test_pt_fea,test_index) in enumerate(test_dataset_loader):
-        #predict
+        # predict
         test_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in test_pt_fea]
         test_grid_ten = [torch.from_numpy(i[:,:2]).to(pytorch_device) for i in test_grid]
 

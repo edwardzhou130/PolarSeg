@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import numba as nb
 import multiprocessing
 import torch_scatter
 
@@ -42,14 +43,14 @@ class ptBEVnet(nn.Module):
         self.fea_compre = fea_compre
         self.grid_size = grid_size
         
-        #NN stuff
+        # NN stuff
         if kernal_size != 1:
             if self.pt_pooling == 'max':
                 self.local_pool_op = torch.nn.MaxPool2d(kernal_size, stride=1, padding=(kernal_size-1)//2, dilation=1)
             else: raise NotImplementedError
         else: self.local_pool_op = None
         
-        #parametric pooling
+        # parametric pooling
         if self.pt_pooling == 'vlad':
             self.clu_cen = torch.nn.Parameter(torch.randn(cluster_num, out_pt_fea_dim))
         
@@ -58,7 +59,7 @@ class ptBEVnet(nn.Module):
         elif self.pt_pooling == 'vlad':
             self.pool_dim = self.clu_cen.shape[0]*out_pt_fea_dim
         
-        #point feature compression
+        # point feature compression
         if self.fea_compre is not None:
             self.fea_compression = nn.Sequential(
                     nn.Linear(self.pool_dim, self.fea_compre),
@@ -125,7 +126,7 @@ class ptBEVnet(nn.Module):
         if self.pt_pooling == 'max':
             pooled_data = torch_scatter.scatter_max(processed_cat_pt_fea, unq_inv, dim=0)[0]
         elif self.pt_pooling == 'vlad':
-            #get fea for each pt
+            # get fea for each pt
             diff = torch.unsqueeze(processed_cat_pt_fea,1) - torch.unsqueeze(self.clu_cen,0)#diff.shape == (num_pt,num_clu,num_fea)
             clu_weight = torch.sqrt(torch.sum(diff**2,dim = 2))#diff.shape == (num_pt,num_clu)
             reweighted_data = torch.unsqueeze(clu_weight,2)*diff
@@ -162,4 +163,37 @@ def grp_range_torch(a,dev):
     return torch.cumsum(id_arr,0)
 
 def parallel_FPS(np_cat_fea,K):
-    return  nb_greedy_FRS(np_cat_fea,K)
+    return  nb_greedy_FPS(np_cat_fea,K)
+
+@nb.jit('b1[:](f4[:,:],i4)',nopython=True,cache=True)
+def nb_greedy_FPS(xyz,K):
+    start_element = 0
+    sample_num = xyz.shape[0]
+    sum_vec = np.zeros((sample_num,1),dtype = np.float32)
+    xyz_sq = xyz**2
+    for j in range(sample_num):
+        sum_vec[j,0] = np.sum(xyz_sq[j,:])
+    pairwise_distance = sum_vec + np.transpose(sum_vec) - 2*np.dot(xyz, np.transpose(xyz))
+    
+    candidates_ind = np.zeros((sample_num,),dtype = np.bool_)
+    candidates_ind[start_element] = True
+    remain_ind = np.ones((sample_num,),dtype = np.bool_)
+    remain_ind[start_element] = False
+    all_ind = np.arange(sample_num)
+    
+    for i in range(1,K):
+        if i == 1:
+            min_remain_pt_dis = pairwise_distance[:,start_element]
+            min_remain_pt_dis = min_remain_pt_dis[remain_ind]
+        else:
+            cur_dis = pairwise_distance[remain_ind,:]
+            cur_dis = cur_dis[:,candidates_ind]
+            min_remain_pt_dis = np.zeros((cur_dis.shape[0],),dtype = np.float32)
+            for j in range(cur_dis.shape[0]):
+                min_remain_pt_dis[j] = np.min(cur_dis[j,:])
+        next_ind_in_remain = np.argmax(min_remain_pt_dis)
+        next_ind = all_ind[remain_ind][next_ind_in_remain]
+        candidates_ind[next_ind] = True
+        remain_ind[next_ind] = False
+        
+    return candidates_ind
