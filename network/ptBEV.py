@@ -13,7 +13,7 @@ class ptBEVnet(nn.Module):
     def __init__(self, BEV_net, grid_size, pt_model = 'pointnet', fea_dim = 3, pt_pooling = 'max', kernal_size = 3,
                  out_pt_fea_dim = 64, max_pt_per_encode = 64, cluster_num = 4, pt_selection = 'farthest', fea_compre = None):
         super(ptBEVnet, self).__init__()
-        assert pt_pooling in ['max','vlad']
+        assert pt_pooling in ['max']
         assert pt_selection in ['random','farthest']
         
         if pt_model == 'pointnet':
@@ -50,14 +50,9 @@ class ptBEVnet(nn.Module):
             else: raise NotImplementedError
         else: self.local_pool_op = None
         
-        # parametric pooling
-        if self.pt_pooling == 'vlad':
-            self.clu_cen = torch.nn.Parameter(torch.randn(cluster_num, out_pt_fea_dim))
-        
+        # parametric pooling        
         if self.pt_pooling == 'max':
             self.pool_dim = out_pt_fea_dim
-        elif self.pt_pooling == 'vlad':
-            self.pool_dim = self.clu_cen.shape[0]*out_pt_fea_dim
         
         # point feature compression
         if self.fea_compre is not None:
@@ -94,7 +89,7 @@ class ptBEVnet(nn.Module):
             grp_ind = grp_range_torch(unq_cnt,cur_dev)[torch.argsort(torch.argsort(unq_inv))]
             remain_ind = grp_ind < self.max_pt
         elif self.pt_selection == 'farthest':
-            unq_ind = np.split(np.argsort(unq_inv), np.cumsum(unq_cnt[:-1]))
+            unq_ind = np.split(np.argsort(unq_inv.detach().cpu().numpy()), np.cumsum(unq_cnt.detach().cpu().numpy()[:-1]))
             remain_ind = np.zeros((pt_num,),dtype = np.bool)
             np_cat_fea = cat_pt_fea.detach().cpu().numpy()[:,:3]
             pool_in = []
@@ -125,16 +120,6 @@ class ptBEVnet(nn.Module):
         
         if self.pt_pooling == 'max':
             pooled_data = torch_scatter.scatter_max(processed_cat_pt_fea, unq_inv, dim=0)[0]
-        elif self.pt_pooling == 'vlad':
-            # get fea for each pt
-            diff = torch.unsqueeze(processed_cat_pt_fea,1) - torch.unsqueeze(self.clu_cen,0)#diff.shape == (num_pt,num_clu,num_fea)
-            clu_weight = torch.sqrt(torch.sum(diff**2,dim = 2))#diff.shape == (num_pt,num_clu)
-            reweighted_data = torch.unsqueeze(clu_weight,2)*diff
-            pt_data = reweighted_data.view(processed_cat_pt_fea.shape[0],self.pool_dim)#pt_data.shape == (num_pt,fea_dim)
-            
-            pooled_data = torch_scatter.scatter_add(pt_data, unq_inv, dim64=0)
-            pt_per_grid_tensor = unq_cnt.view(-1,1)
-            pooled_data = pooled_data/pt_per_grid_tensor.type(torch.float32)    
         else: raise NotImplementedError
         
         if self.fea_compre:

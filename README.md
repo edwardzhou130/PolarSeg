@@ -1,7 +1,7 @@
 # PolarSeg
 This is the official implmentation for "Ring Matrix: A Superior Data Representation for LiDAR Point Cloud Semantic Segmentation".
 
-## Prepare dataset and enviroment
+## Prepare dataset and environment
 
 The dependencies of this code are:
 * numpy
@@ -15,7 +15,7 @@ The dependencies of this code are:
 
 2, Extract everything into the same folder. The folder structure inside the zip files of label data matches the folder structure of the LiDAR point cloud data.
 
-3, data file structure should look like this:
+3, Data file structure should look like this:
 
 ```shell
 ./
