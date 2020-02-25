@@ -170,13 +170,13 @@ def main(args):
     del test_grid,test_pt_fea,test_index
     pbar.close()
     print('Predicted test labels are saved in %s. Need to be shifted to original label format before submitting to the Competition website.' % output_path)
-    print('Remap script can be found in semantic-kitti-api.')
+    print('Remapping script can be found in semantic-kitti-api.')
 
 if __name__ == '__main__':
     # Testing settings
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-d', '--data_dir', default='data')
-    parser.add_argument('-p', '--model_save_path', default='pretained_weight/SemKITTI_PolarSeg.pt')
+    parser.add_argument('-p', '--model_save_path', default='pretrained_weight/SemKITTI_PolarSeg.pt')
     parser.add_argument('-o', '--test_output_path', default='out/SemKITTI_test')
     parser.add_argument('-m', '--model', choices=['polar','traditional'], default='polar', help='training model: polar or traditional (default: polar)')
     parser.add_argument('-s', '--grid_size', nargs='+', type=int, default = [480,360,32], help='grid size of BEV representation (default: [480,360,32])')
