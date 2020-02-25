@@ -1,5 +1,15 @@
 # PolarSeg
+<p align="center">
+        <img src="imgs/PC_vis.png" title="SemanticKITTI Point Cloud" width="48%"> <img src="imgs/predict_vis.png" title="PolarSeg Prediction" width="48%">
+        <em>Point cloud visualization of SemanticKITTI dataset(left) and the prediction result of PolarSeg(right).</em>
+</p>
+
 This is the official implmentation for "Ring Matrix: A Superior Data Representation for LiDAR Point Cloud Semantic Segmentation".
+
+## Overview
+<p align="center">
+        <img src="imgs/overview.png" width="90%"> 
+</p>
 
 ## Prepare dataset and environment
 
