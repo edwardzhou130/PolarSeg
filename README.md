@@ -8,7 +8,7 @@ This is the official implmentation for CVPR 2020 paper ["PolarNet: An Improved G
 
 ## What is PolarNet?
 
-PolarNet is a lightweight nerual network aims to provide near-realtime online semantic segmentation for single LiDAR scan. Unlkine existing methods which reqire KNN to build graph and/or 3D/graph convolution, we achieve fast inference spped by avioding both of them. As shown below, we quantize points into grids using their polar coordinations. We then feed each grid's learned fixed-length representation to a 2D nerual network to produce point segmentation results.
+PolarNet is a lightweight neural network that aims to provide near-real-time online semantic segmentation for a single LiDAR scan. Unlike existing methods that require KNN to build a graph and/or 3D/graph convolution, we achieve fast inference speed by avoiding both of them. As shown below, we quantize points into grids using their polar coordinations. We then learn a fixed-length representation for each grid and feed them to a 2D neural network to produce point segmentation results.
 
 <p align="center">
         <img src="imgs/overview.png" width="90%"> 
@@ -16,7 +16,7 @@ PolarNet is a lightweight nerual network aims to provide near-realtime online se
 
 ## Prepare dataset and environment
 
-The dependencies of this code are:
+1, Install the following dependencies using `conda install --file requirements.txt`.
 * numpy
 * pytorch
 * tqdm
@@ -24,11 +24,11 @@ The dependencies of this code are:
 * numba
 * torch_scatter
 
-1, Download Velodyne point clouds and label data in SemanticKITTI dataset [here](http://www.semantic-kitti.org/dataset.html#overview).
+2, Download Velodyne point clouds and label data in SemanticKITTI dataset [here](http://www.semantic-kitti.org/dataset.html#overview).
 
-2, Extract everything into the same folder. The folder structure inside the zip files of label data matches the folder structure of the LiDAR point cloud data.
+3, Extract everything into the same folder. The folder structure inside the zip files of label data matches the folder structure of the LiDAR point cloud data.
 
-3, Data file structure should look like this:
+4, Data file structure should look like this:
 
 ```shell
 ./
