@@ -25,7 +25,7 @@ PolarNet is a lightweight neural network that aims to provide near-real-time onl
         <img src="imgs/overview.png" width="90%"> 
 </p>
 
-We achieved leading performance in the following LiDAR scan datasets: SemanticKITTI, A2D2 and Paris-Lille-3D.
+We achieved leading mIoU performance in the following LiDAR scan datasets : SemanticKITTI, A2D2 and Paris-Lille-3D.
 
 <center>
 	
