@@ -107,7 +107,7 @@ class double_conv_circular(nn.Module):
             )
 
     def forward(self, x):
-        #add circular padding
+        #add circular padding (We implement ring convolution by connecting both ends of matrix via circular padding)
         x = F.pad(x,(1,1,0,0),mode = 'circular')
         x = self.conv1(x)
         x = F.pad(x,(1,1,0,0),mode = 'circular')
