@@ -6,7 +6,10 @@
 
 This is the official implmentation for CVPR 2020 paper ["PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation"](https://arxiv.org/abs/2003.14032).
 
-## Overview
+## What is PolarNet?
+
+PolarNet is a lightweight nerual network aims to provide near-realtime online semantic segmentation for single LiDAR scan. Unlkine existing methods which reqire KNN to build graph and/or 3D/graph convolution, we achieve fast inference spped by avioding both of them. As shown below, we quantize points into grids using their polar coordinations. We then feed each grid's learned fixed-length representation to a 2D nerual network to produce point segmentation results.
+
 <p align="center">
         <img src="imgs/overview.png" width="90%"> 
 </p>
