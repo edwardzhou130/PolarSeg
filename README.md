@@ -1,10 +1,21 @@
-# PolarNet
+# PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation
+
+
 <p align="center">
         <img src="imgs/PC_vis.png" title="SemanticKITTI Point Cloud" width="48%"> <img src="imgs/predict_vis.png" title="PolarSeg Prediction" width="48%">
-        <em>Point cloud visualization of SemanticKITTI dataset(left) and the prediction result of PolarNet(right).</em>
+        <em>LiDAR scan visualization of SemanticKITTI dataset(left) and the prediction result of PolarNet(right).</em>
 </p>
 
-This is the official implmentation for CVPR 2020 paper ["PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation"](https://arxiv.org/abs/2003.14032).
+Official implementation for online LiDAR scan segmentation neural network **PolarNet** (CVPR 2020).
+
+<pre>
+"PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation
+Yang Zhang*; Zixiang Zhou*; Philip David; Xiangyu Yue; Zerong Xi; Hassan Foroosh
+Conference on Computer Vision and Pattern Recognition, 2020
+*Equal contribution
+</pre>
+
+[[**ArXiv paper**]](https://arxiv.org/abs/2003.14032)
 
 ## What is PolarNet?
 
@@ -16,7 +27,7 @@ PolarNet is a lightweight neural network that aims to provide near-real-time onl
 
 ## Prepare dataset and environment
 
-1, Install the following dependencies using `conda install --file requirements.txt`.
+1, Install the following dependencies by either `pip install -r requirements.txt` or manual installation.
 * numpy
 * pytorch
 * tqdm
@@ -30,7 +41,7 @@ PolarNet is a lightweight neural network that aims to provide near-real-time onl
 
 4, Data file structure should look like this:
 
-```shell
+```
 ./
 ├── train.py
 ├── ...
@@ -65,7 +76,7 @@ Result will be stored in `./out` folder. Test performance can be evaluated by up
 Remember to shift label number back to the original dataset format before submitting! Instruction can be found in [semantic-kitti-api repo](https://github.com/PRBonn/semantic-kitti-api).
 
 ## Citation
-Please cite our paper if this code benefits your reseaarch:
+Please cite our paper if this code benefits your research:
 ```
 @InProceedings{Zhang_2020_PolarNet,
 author = {Yang Zhang and Zixiang Zhou and Philip David and Xiangyu Yue and Zerong Xi and Hassan Foroosh},
