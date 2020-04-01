@@ -25,6 +25,20 @@ PolarNet is a lightweight neural network that aims to provide near-real-time onl
         <img src="imgs/overview.png" width="90%"> 
 </p>
 
+We achieved leading performance in the following LiDAR scan datasets: SemanticKITTI, A2D2 and Paris-Lille-3D.
+
+<center>
+	
+Model | SemanticKITTI | A2D2 | Paris-Lille-3D
+--- | --- | --- | ---
+Squeezesegv2  | 39.7%  | 16.4% | 36.9%
+DarkNet53 | 49.9%  |  17.2%  |  40.0%
+RangeNet++ | 52.2%  | - | - | 
+RandLA | 53.2%  | - | - | 
+**PolarNet**  | **54.3%** | **23.9%** | **43.7%**
+
+</center>
+
 ## Prepare dataset and environment
 
 1, Install the following dependencies by either `pip install -r requirements.txt` or manual installation.
@@ -73,7 +87,11 @@ python test_pretrain.py
 ```
 Result will be stored in `./out` folder. Test performance can be evaluated by uploading label results onto the SemanticKITTI competition website [here](https://competitions.codalab.org/competitions/20331).
 
-Remember to shift label number back to the original dataset format before submitting! Instruction can be found in [semantic-kitti-api repo](https://github.com/PRBonn/semantic-kitti-api).
+Remember to shift label number back to the original dataset format before submitting! Instruction can be found in [semantic-kitti-api repo](https://github.com/PRBonn/semantic-kitti-api). You should be able to reproduce the SemanticKITTI results reported in our paper.
+
+<p align="center">
+        <img src="imgs/SKITTI.png" width="100%"> 
+</p>
 
 ## Citation
 Please cite our paper if this code benefits your research:
