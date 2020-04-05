@@ -46,8 +46,8 @@ RandLA | 53.2%  | - | - |
 * pytorch
 * tqdm
 * yaml
-* numba
-* torch_scatter
+* [numba](https://github.com/numba/numba)
+* [torch-scatter](https://github.com/rusty1s/pytorch_scatter)
 
 2, Download Velodyne point clouds and label data in SemanticKITTI dataset [here](http://www.semantic-kitti.org/dataset.html#overview).
 
@@ -76,12 +76,15 @@ RandLA | 53.2%  | - | - |
 ```
 ## Training
 
+Run
 ```shell
 python train.py
 ```
+to train a SemanticKITTI segmentation PolarNet from scratch after dataset preparation. The code will automatically train, validate and early stop training process.
 
 ## Evaluate our pretrained model
 
+We also provide a pretrained SemanticKITTI PolarNet weight.
 ```shell
 python test_pretrain.py
 ```
