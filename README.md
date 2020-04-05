@@ -9,7 +9,7 @@
 Official PyTorch implementation for online LiDAR scan segmentation neural network **PolarNet** (CVPR 2020).
 
 <pre>
-"PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation
+PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation
 Yang Zhang*; Zixiang Zhou*; Philip David; Xiangyu Yue; Zerong Xi; Hassan Foroosh
 Conference on Computer Vision and Pattern Recognition, 2020
 *Equal contribution
