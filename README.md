@@ -6,7 +6,7 @@
         <em>LiDAR scan visualization of SemanticKITTI dataset(left) and the prediction result of PolarNet(right).</em>
 </p>
 
-Official implementation for online LiDAR scan segmentation neural network **PolarNet** (CVPR 2020).
+Official PyTorch implementation for online LiDAR scan segmentation neural network **PolarNet** (CVPR 2020).
 
 <pre>
 "PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation
