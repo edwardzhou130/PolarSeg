@@ -41,11 +41,14 @@ RandLA | 53.2%  | - | - |
 
 ## Prepare dataset and environment
 
+This code is tested on Ubuntu 16.04 with Python 3.5, CUDA 9.2 and Pytorch 1.3.1.
+
 1, Install the following dependencies by either `pip install -r requirements.txt` or manual installation.
 * numpy
 * pytorch
 * tqdm
 * yaml
+* Cython
 * [numba](https://github.com/numba/numba)
 * [torch-scatter](https://github.com/rusty1s/pytorch_scatter)
 

@@ -1,6 +1,0 @@
-numpy
-pytorch
-tqdm
-yaml
-numba
-torch_scatter
