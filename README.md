@@ -85,6 +85,8 @@ python train.py
 ```
 to train a SemanticKITTI segmentation PolarNet from scratch after dataset preparation. The code will automatically train, validate and early stop training process.
 
+Note that we trained our model on a single TITAN Xp which has 12 GB GPU memory. Training model on GPU with less memory would likely cause GPU out-of-memory. You will see the exception report if there is a OOM. In this case, you might want to train model with smaller quantization grid/ feature map via `python train.py --grid_size [320,240,32]`.
+
 ## Evaluate our pretrained model
 
 We also provide a pretrained SemanticKITTI PolarNet weight.
