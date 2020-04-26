@@ -10,7 +10,7 @@ Official PyTorch implementation for online LiDAR scan segmentation neural networ
 
 <pre>
 PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation
-Yang Zhang*; Zixiang Zhou*; Philip David; Xiangyu Yue; Zerong Xi; Hassan Foroosh
+Yang Zhang*; Zixiang Zhou*; Philip David; Xiangyu Yue; Zerong Xi; Boqing Gong; Hassan Foroosh
 Conference on Computer Vision and Pattern Recognition, 2020
 *Equal contribution
 </pre>
@@ -105,7 +105,7 @@ Remember to shift label number back to the original dataset format before submit
 Please cite our paper if this code benefits your research:
 ```
 @InProceedings{Zhang_2020_PolarNet,
-author = {Yang Zhang and Zixiang Zhou and Philip David and Xiangyu Yue and Zerong Xi and Hassan Foroosh},
+author = {Yang Zhang and Zixiang Zhou and Philip David and Xiangyu Yue and Zerong Xi and Boqing Gong and Hassan Foroosh},
 title = {PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation},
 booktitle={IEEE Conference on Computer Vision and Pattern Recognition},
 Year = {2020},
