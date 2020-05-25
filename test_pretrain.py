@@ -38,7 +38,6 @@ def SemKITTI2train(label):
         return SemKITTI2train_single(label)
 
 def SemKITTI2train_single(label):
-    print("in",label.dtype)
     return label - 1 # uint8 trick
 
 def train2SemKITTI(input_label):
