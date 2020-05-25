@@ -270,7 +270,7 @@ def nb_process_label(processed_label,sorted_label_voxel_pair):
 
 def collate_fn_BEV(data):
     data2stack=np.stack([d[0] for d in data]).astype(np.float32)
-    label2stack=np.stack([d[1] for d in data]).astype(np.int)
+    label2stack=np.stack([d[1] for d in data])
     grid_ind_stack = [d[2] for d in data]
     point_label = [d[3] for d in data]
     xyz = [d[4] for d in data]
@@ -278,7 +278,7 @@ def collate_fn_BEV(data):
 
 def collate_fn_BEV_test(data):    
     data2stack=np.stack([d[0] for d in data]).astype(np.float32)
-    label2stack=np.stack([d[1] for d in data]).astype(np.int)
+    label2stack=np.stack([d[1] for d in data])
     grid_ind_stack = [d[2] for d in data]
     point_label = [d[3] for d in data]
     xyz = [d[4] for d in data]

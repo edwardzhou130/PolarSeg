@@ -39,10 +39,7 @@ def SemKITTI2train(label):
         return SemKITTI2train_single(label)
 
 def SemKITTI2train_single(label):
-    remove_ind = label == 0
-    label -= 1
-    label[remove_ind] = 255
-    return label
+    return label - 1 # uint8 trick
 
 def main(args):
     data_path = args.data_dir
@@ -167,7 +164,9 @@ def main(args):
                 loss.backward()
                 optimizer.step()
                 loss_list.append(loss.item())
-            except Exception: 
+            except Exception as error: 
+                if exce_counter == 0:
+                    print(error)
                 exce_counter += 1
             
             # zero the parameter gradients
