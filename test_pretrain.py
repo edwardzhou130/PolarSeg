@@ -42,7 +42,7 @@ def SemKITTI2train_single(label):
 
 def train2SemKITTI(input_label):
     # delete 0 label (uses uint8 trick : 0 - 1 = 255 )
-    return input_label - 1
+    return input_label + 1
 
 def main(args):
     data_path = args.data_dir
