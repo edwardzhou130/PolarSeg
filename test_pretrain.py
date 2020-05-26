@@ -38,18 +38,11 @@ def SemKITTI2train(label):
         return SemKITTI2train_single(label)
 
 def SemKITTI2train_single(label):
-    remove_ind = label == 0
-    label -= 1
-    label[remove_ind] = 255
-    return label
+    return label - 1 # uint8 trick
 
 def train2SemKITTI(input_label):
-    # delete 0 label
-    new_labels=np.copy(input_label)
-    new_labels[input_label==255]=0
-    for label_num in range(0,19):
-        new_labels[input_label==label_num]=label_num+1
-    return new_labels
+    # delete 0 label (uses uint8 trick : 0 - 1 = 255 )
+    return input_label + 1
 
 def main(args):
     data_path = args.data_dir
@@ -142,31 +135,32 @@ def main(args):
     print('Generate predictions for test split')
     print('*'*80)
     pbar = tqdm(total=len(test_dataset_loader))
-    for i_iter_test,(_,_,test_grid,_,test_pt_fea,test_index) in enumerate(test_dataset_loader):
-        # predict
-        test_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in test_pt_fea]
-        test_grid_ten = [torch.from_numpy(i[:,:2]).to(pytorch_device) for i in test_grid]
+    with torch.no_grad():
+        for i_iter_test,(_,_,test_grid,_,test_pt_fea,test_index) in enumerate(test_dataset_loader):
+            # predict
+            test_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in test_pt_fea]
+            test_grid_ten = [torch.from_numpy(i[:,:2]).to(pytorch_device) for i in test_grid]
 
-        predict_labels = my_model(test_pt_fea_ten,test_grid_ten)
-        predict_labels = torch.argmax(predict_labels,1)
-        predict_labels = predict_labels.cpu().detach().numpy()
-        # write to label file
-        for count,i_test_grid in enumerate(test_grid):
-            test_pred_label = predict_labels[count,test_grid[count][:,0],test_grid[count][:,1],test_grid[count][:,2]]
-            test_pred_label = train2SemKITTI(test_pred_label)
-            test_pred_label = np.expand_dims(test_pred_label,axis=1)
-            save_dir = test_pt_dataset.im_idx[test_index[count]]
-            _,dir2 = save_dir.split('/sequences/',1)
-            new_save_dir = output_path + '/sequences/' +dir2.replace('velodyne','predictions')[:-3]+'label'
-            if not os.path.exists(os.path.dirname(new_save_dir)):
-                try:
-                    os.makedirs(os.path.dirname(new_save_dir))
-                except OSError as exc:
-                    if exc.errno != errno.EEXIST:
-                        raise
-            test_pred_label = test_pred_label.astype(np.uint32)
-            test_pred_label.tofile(new_save_dir)
-        pbar.update(1)
+            predict_labels = my_model(test_pt_fea_ten,test_grid_ten)
+            predict_labels = torch.argmax(predict_labels,1).type(torch.uint8)
+            predict_labels = predict_labels.cpu().detach().numpy()
+            # write to label file
+            for count,i_test_grid in enumerate(test_grid):
+                test_pred_label = predict_labels[count,test_grid[count][:,0],test_grid[count][:,1],test_grid[count][:,2]]
+                test_pred_label = train2SemKITTI(test_pred_label)
+                test_pred_label = np.expand_dims(test_pred_label,axis=1)
+                save_dir = test_pt_dataset.im_idx[test_index[count]]
+                _,dir2 = save_dir.split('/sequences/',1)
+                new_save_dir = output_path + '/sequences/' +dir2.replace('velodyne','predictions')[:-3]+'label'
+                if not os.path.exists(os.path.dirname(new_save_dir)):
+                    try:
+                        os.makedirs(os.path.dirname(new_save_dir))
+                    except OSError as exc:
+                        if exc.errno != errno.EEXIST:
+                            raise
+                test_pred_label = test_pred_label.astype(np.uint32)
+                test_pred_label.tofile(new_save_dir)
+            pbar.update(1)
     del test_grid,test_pt_fea,test_index
     pbar.close()
     print('Predicted test labels are saved in %s. Need to be shifted to original label format before submitting to the Competition website.' % output_path)
