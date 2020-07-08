@@ -34,8 +34,10 @@ Model | SemanticKITTI | A2D2 | Paris-Lille-3D
 Squeezesegv2  | 39.7%  | 16.4% | 36.9%
 DarkNet53 | 49.9%  |  17.2%  |  40.0%
 RangeNet++ | 52.2%  | - | - | 
-RandLA | 53.2%  | - | - | 
-**PolarNet**  | **56.1%** | **23.9%** | **43.7%**
+RandLA | 53.9%  | - | - | 
+3D-MiniNet | 55.8%  | - | - |
+Squeezesegv3  | 55.9%  | - | - | 
+**PolarNet**  | **57.2%** | **23.9%** | **43.7%**| 
 
 </center>
 
