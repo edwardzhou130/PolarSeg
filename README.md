@@ -53,6 +53,7 @@ This code is tested on Ubuntu 16.04 with Python 3.5, CUDA 9.2 and Pytorch 1.3.1.
 * Cython
 * [numba](https://github.com/numba/numba)
 * [torch-scatter](https://github.com/rusty1s/pytorch_scatter)
+* [dropblock](https://github.com/miguelvr/dropblock)
 
 2, Download Velodyne point clouds and label data in SemanticKITTI dataset [here](http://www.semantic-kitti.org/dataset.html#overview).
 
@@ -106,11 +107,12 @@ Remember to shift label number back to the original dataset format before submit
 ## Citation
 Please cite our paper if this code benefits your research:
 ```
-@InProceedings{Zhang_2020_PolarNet,
-author = {Yang Zhang and Zixiang Zhou and Philip David and Xiangyu Yue and Zerong Xi and Boqing Gong and Hassan Foroosh},
+@InProceedings{Zhang_2020_CVPR,
+author = {Zhang, Yang and Zhou, Zixiang and David, Philip and Yue, Xiangyu and Xi, Zerong and Gong, Boqing and Foroosh, Hassan},
 title = {PolarNet: An Improved Grid Representation for Online LiDAR Point Clouds Semantic Segmentation},
-booktitle={IEEE Conference on Computer Vision and Pattern Recognition},
-Year = {2020},
+booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+month = {June},
+year = {2020}
 }
 ```
 

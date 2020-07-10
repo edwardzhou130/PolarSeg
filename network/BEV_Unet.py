@@ -5,15 +5,16 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from dropblock import DropBlock2D
 
 
 class BEV_Unet(nn.Module):
 
-    def __init__(self,n_class,n_height,dilation = 1,group_conv=False,input_batch_norm = False,dropout = 0.,circular_padding = False):
+    def __init__(self,n_class,n_height,dilation = 1,group_conv=False,input_batch_norm = False,dropout = 0.,circular_padding = False, dropblock = True):
         super(BEV_Unet, self).__init__()
         self.n_class = n_class
         self.n_height = n_height
-        self.network = UNet(n_class*n_height,n_height,dilation,group_conv,input_batch_norm,dropout,circular_padding)
+        self.network = UNet(n_class*n_height,n_height,dilation,group_conv,input_batch_norm,dropout,circular_padding,dropblock)
 
     def forward(self, x):
         x = self.network(x)
@@ -25,18 +26,18 @@ class BEV_Unet(nn.Module):
         return x
     
 class UNet(nn.Module):
-    def __init__(self, n_class,n_height,dilation,group_conv,input_batch_norm, dropout,circular_padding):
+    def __init__(self, n_class,n_height,dilation,group_conv,input_batch_norm, dropout,circular_padding,dropblock):
         super(UNet, self).__init__()
         self.inc = inconv(n_height, 64, dilation, input_batch_norm, circular_padding)
         self.down1 = down(64, 128, dilation, group_conv, circular_padding)
         self.down2 = down(128, 256, dilation, group_conv, circular_padding)
         self.down3 = down(256, 512, dilation, group_conv, circular_padding)
         self.down4 = down(512, 512, dilation, group_conv, circular_padding)
-        self.up1 = up(1024, 256, circular_padding, group_conv = group_conv)
-        self.up2 = up(512, 128, circular_padding, group_conv = group_conv)
-        self.up3 = up(256, 64, circular_padding, group_conv = group_conv)
-        self.up4 = up(128, 64, circular_padding, group_conv = group_conv)
-        self.dropout = nn.Dropout(p=dropout)
+        self.up1 = up(1024, 256, circular_padding, group_conv = group_conv, use_dropblock=dropblock, drop_p=dropout)
+        self.up2 = up(512, 128, circular_padding, group_conv = group_conv, use_dropblock=dropblock, drop_p=dropout)
+        self.up3 = up(256, 64, circular_padding, group_conv = group_conv, use_dropblock=dropblock, drop_p=dropout)
+        self.up4 = up(128, 64, circular_padding, group_conv = group_conv, use_dropblock=dropblock, drop_p=dropout)
+        self.dropout = nn.Dropout(p=0. if dropblock else dropout)
         self.outc = outconv(64, n_class)
 
     def forward(self, x):
@@ -60,19 +61,19 @@ class double_conv(nn.Module):
             self.conv = nn.Sequential(
                 nn.Conv2d(in_ch, out_ch, 3, padding=1,groups = min(out_ch,in_ch)),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True),
+                nn.LeakyReLU(inplace=True),
                 nn.Conv2d(out_ch, out_ch, 3, padding=1,groups = out_ch),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True)
+                nn.LeakyReLU(inplace=True)
             )
         else:
             self.conv = nn.Sequential(
                 nn.Conv2d(in_ch, out_ch, 3, padding=1),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True),
+                nn.LeakyReLU(inplace=True),
                 nn.Conv2d(out_ch, out_ch, 3, padding=1),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True)
+                nn.LeakyReLU(inplace=True)
             )
 
     def forward(self, x):
@@ -87,27 +88,27 @@ class double_conv_circular(nn.Module):
             self.conv1 = nn.Sequential(
                 nn.Conv2d(in_ch, out_ch, 3, padding=(1,0),groups = min(out_ch,in_ch)),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True)
+                nn.LeakyReLU(inplace=True)
             )
             self.conv2 = nn.Sequential(
                 nn.Conv2d(out_ch, out_ch, 3, padding=(1,0),groups = out_ch),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True)
+                nn.LeakyReLU(inplace=True)
             )
         else:
             self.conv1 = nn.Sequential(
                 nn.Conv2d(in_ch, out_ch, 3, padding=(1,0)),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True)
+                nn.LeakyReLU(inplace=True)
             )
             self.conv2 = nn.Sequential(
                 nn.Conv2d(out_ch, out_ch, 3, padding=(1,0)),
                 nn.BatchNorm2d(out_ch),
-                nn.ReLU(inplace=True)
+                nn.LeakyReLU(inplace=True)
             )
 
     def forward(self, x):
-        #add circular padding (We implement ring convolution by connecting both ends of matrix via circular padding)
+        #add circular padding
         x = F.pad(x,(1,1,0,0),mode = 'circular')
         x = self.conv1(x)
         x = F.pad(x,(1,1,0,0),mode = 'circular')
@@ -160,7 +161,7 @@ class down(nn.Module):
 
 
 class up(nn.Module):
-    def __init__(self, in_ch, out_ch, circular_padding, bilinear=True, group_conv=False):
+    def __init__(self, in_ch, out_ch, circular_padding, bilinear=True, group_conv=False, use_dropblock = False, drop_p = 0.5):
         super(up, self).__init__()
 
         #  would be a nice idea if the upsampling could be learned too,
@@ -176,6 +177,10 @@ class up(nn.Module):
             self.conv = double_conv_circular(in_ch, out_ch,group_conv = group_conv)
         else:
             self.conv = double_conv(in_ch, out_ch,group_conv = group_conv)
+
+        self.use_dropblock = use_dropblock
+        if self.use_dropblock:
+            self.dropblock = DropBlock2D(block_size=7, drop_prob=drop_p)
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
@@ -193,6 +198,8 @@ class up(nn.Module):
 
         x = torch.cat([x2, x1], dim=1)
         x = self.conv(x)
+        if self.use_dropblock:
+            x = self.dropblock(x)
         return x
 
 
