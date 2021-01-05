@@ -22,15 +22,15 @@ class ptBEVnet(nn.Module):
                 
                 nn.Linear(fea_dim, 64),
                 nn.BatchNorm1d(64),
-                nn.ReLU(),
+                nn.ReLU(inplace=True),
                 
                 nn.Linear(64, 128),
                 nn.BatchNorm1d(128),
-                nn.ReLU(),
+                nn.ReLU(inplace=True),
                 
                 nn.Linear(128, 256),
                 nn.BatchNorm1d(256),
-                nn.ReLU(),
+                nn.ReLU(inplace=True),
                 
                 nn.Linear(256, out_pt_fea_dim)
             )
@@ -63,7 +63,7 @@ class ptBEVnet(nn.Module):
         else:
             self.pt_fea_dim = self.pool_dim
         
-    def forward(self, pt_fea, xy_ind):
+    def forward(self, pt_fea, xy_ind, voxel_fea=None):
         cur_dev = pt_fea[0].get_device()
         
         # concate everything
@@ -134,6 +134,8 @@ class ptBEVnet(nn.Module):
         out_data = out_data.permute(0,3,1,2)
         if self.local_pool_op != None:
             out_data = self.local_pool_op(out_data)
+        if voxel_fea is not None:
+            out_data = torch.cat((out_data, voxel_fea), 1)
         
         # run through network
         net_return_data = self.BEV_model(out_data)

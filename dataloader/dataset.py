@@ -31,6 +31,7 @@ class SemKITTI(data.Dataset):
         self.im_idx = []
         for i_folder in split:
             self.im_idx += absoluteFilePaths('/'.join([data_path,str(i_folder).zfill(2),'velodyne']))
+        self.im_idx.sort()
          
     def __len__(self):
         'Denotes the total number of samples'
@@ -227,14 +228,29 @@ class spherical_dataset(data.Dataset):
         dim_array = np.ones(len(self.grid_size)+1,int)
         dim_array[0] = -1 
         voxel_position = np.indices(self.grid_size)*intervals.reshape(dim_array) + min_bound.reshape(dim_array)
-        voxel_position = polar2cat(voxel_position)
+        # voxel_position = polar2cat(voxel_position)
         
         # process labels
         processed_label = np.ones(self.grid_size,dtype = np.uint8)*self.ignore_label
         label_voxel_pair = np.concatenate([grid_ind,labels],axis = 1)
         label_voxel_pair = label_voxel_pair[np.lexsort((grid_ind[:,0],grid_ind[:,1],grid_ind[:,2])),:]
         processed_label = nb_process_label(np.copy(processed_label),label_voxel_pair)
-        data_tuple = (voxel_position,processed_label)
+        # data_tuple = (voxel_position,processed_label)
+
+        # prepare visiblity feature
+        # find max distance index in each angle,height pair
+        valid_label = np.zeros_like(processed_label,dtype=bool)
+        valid_label[grid_ind[:,0],grid_ind[:,1],grid_ind[:,2]] = True
+        valid_label = valid_label[::-1]
+        max_distance_index = np.argmax(valid_label,axis=0)
+        max_distance = max_bound[0]-intervals[0]*(max_distance_index)
+        distance_feature = np.expand_dims(max_distance, axis=2)-np.transpose(voxel_position[0],(1,2,0))
+        distance_feature = np.transpose(distance_feature,(1,2,0))
+        # convert to boolean feature
+        distance_feature = (distance_feature>0)*-1.
+        distance_feature[grid_ind[:,2],grid_ind[:,0],grid_ind[:,1]]=1.
+
+        data_tuple = (distance_feature,processed_label)
 
         # center data on each voxel for PTnet
         voxel_centers = (grid_ind.astype(np.float32) + 0.5)*intervals + min_bound

@@ -37,7 +37,7 @@ RangeNet++ | 52.2%  | - | - |
 RandLA | 53.9%  | - | - | 
 3D-MiniNet | 55.8%  | - | - |
 Squeezesegv3  | 55.9%  | - | - | 
-**PolarNet**  | **57.2%** | **23.9%** | **43.7%**| 
+**PolarNet**  | **57.2%** | **23.9%** | **53.3%**| 
 
 </center>
 
@@ -54,6 +54,7 @@ This code is tested on Ubuntu 16.04 with Python 3.5, CUDA 9.2 and Pytorch 1.3.1.
 * [numba](https://github.com/numba/numba)
 * [torch-scatter](https://github.com/rusty1s/pytorch_scatter)
 * [dropblock](https://github.com/miguelvr/dropblock)
+* (Optional) [nuscenes-devkit](https://github.com/nutonomy/nuscenes-devkit)
 
 2, Download Velodyne point clouds and label data in SemanticKITTI dataset [here](http://www.semantic-kitti.org/dataset.html#overview).
 
@@ -63,7 +64,7 @@ This code is tested on Ubuntu 16.04 with Python 3.5, CUDA 9.2 and Pytorch 1.3.1.
 
 ```
 ./
-├── train.py
+├── train_SemanticKITTI.py
 ├── ...
 └── data/
     ├──sequences
@@ -84,17 +85,17 @@ This code is tested on Ubuntu 16.04 with Python 3.5, CUDA 9.2 and Pytorch 1.3.1.
 
 Run
 ```shell
-python train.py
+python train_SemanticKITTI.py
 ```
 to train a SemanticKITTI segmentation PolarNet from scratch after dataset preparation. The code will automatically train, validate and early stop training process.
 
-Note that we trained our model on a single TITAN Xp which has 12 GB GPU memory. Training model on GPU with less memory would likely cause GPU out-of-memory. You will see the exception report if there is a OOM. In this case, you might want to train model with smaller quantization grid/ feature map via `python train.py --grid_size [320,240,32]`.
+Note that we trained our model on a single TITAN Xp which has 12 GB GPU memory. Training model on GPU with less memory would likely cause GPU out-of-memory. You will see the exception report if there is a OOM. In this case, you might want to train model with smaller quantization grid/ feature map via `python train_SemanticKITTI.py --grid_size 320 240 32`.
 
 ## Evaluate our pretrained model
 
 We also provide a pretrained SemanticKITTI PolarNet weight.
 ```shell
-python test_pretrain.py
+python test_pretrain_SemanticKITTI.py
 ```
 Result will be stored in `./out` folder. Test performance can be evaluated by uploading label results onto the SemanticKITTI competition website [here](https://competitions.codalab.org/competitions/20331).
 
@@ -103,6 +104,30 @@ Remember to shift label number back to the original dataset format before submit
 <p align="center">
         <img src="imgs/SKITTI.png" width="100%"> 
 </p>
+
+## Paris-Lille-3D and nuScenes datasets (New)
+Download [Paris-Lille-3D](https://npm3d.fr/paris-lille-3d) and [nuScenes](https://www.nuscenes.org/) datasets and put it in the ``data`` folder like this:
+```
+data/
+├──NuScenes/
+|   ├── trainval/           
+|   │   ├── lidarseg/	
+|   |   ├── maps/
+|   |   ├── ...
+|   │   └── v1.0-trainval/ 
+|   └── test/
+|            └── ...
+└──paris_lille/
+    ├── coarse_classes.xml
+    ├── Lille1.ply
+    ├── ...
+    └── Paris.ply
+```
+Training and evaluation code works similar to SemanticKITTI:
+```shell
+python train_nuscenes.py --visibility
+python train_PL.py
+```
 
 ## Citation
 Please cite our paper if this code benefits your research:

@@ -10,11 +10,14 @@ from dropblock import DropBlock2D
 
 class BEV_Unet(nn.Module):
 
-    def __init__(self,n_class,n_height,dilation = 1,group_conv=False,input_batch_norm = False,dropout = 0.,circular_padding = False, dropblock = True):
+    def __init__(self,n_class,n_height,dilation = 1,group_conv=False,input_batch_norm = False,dropout = 0.,circular_padding = False, dropblock = True, use_vis_fea=False):
         super(BEV_Unet, self).__init__()
         self.n_class = n_class
         self.n_height = n_height
-        self.network = UNet(n_class*n_height,n_height,dilation,group_conv,input_batch_norm,dropout,circular_padding,dropblock)
+        if use_vis_fea:
+            self.network = UNet(n_class*n_height,2*n_height,dilation,group_conv,input_batch_norm,dropout,circular_padding,dropblock)
+        else:
+            self.network = UNet(n_class*n_height,n_height,dilation,group_conv,input_batch_norm,dropout,circular_padding,dropblock)
 
     def forward(self, x):
         x = self.network(x)
