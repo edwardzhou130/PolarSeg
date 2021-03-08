@@ -99,7 +99,12 @@ python test_pretrain_SemanticKITTI.py
 ```
 Result will be stored in `./out` folder. Test performance can be evaluated by uploading label results onto the SemanticKITTI competition website [here](https://competitions.codalab.org/competitions/20331).
 
-Remember to shift label number back to the original dataset format before submitting! Instruction can be found in [semantic-kitti-api repo](https://github.com/PRBonn/semantic-kitti-api). You should be able to reproduce the SemanticKITTI results reported in our paper.
+Remember to shift label number back to the original dataset format before submitting! Instruction can be found in [semantic-kitti-api repo](https://github.com/PRBonn/semantic-kitti-api).
+
+```shell
+python remap_semantic_labels.py -p </your result path> -s test --inverse
+```
+You should be able to reproduce the SemanticKITTI results reported in our paper.
 
 <p align="center">
         <img src="imgs/SKITTI.png" width="100%"> 
