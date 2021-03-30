@@ -17,6 +17,9 @@ Conference on Computer Vision and Pattern Recognition, 2020
 
 [[**ArXiv paper**]](https://arxiv.org/abs/2003.14032)
 
+# News
+[2021-03] Our [paper](https://arxiv.org/abs/2103.14962) on panoptic segmentation task is accepted at CVPR 2021. Code is now available at [Panoptic-PolarNet](https://github.com/edwardzhou130/Panoptic-PolarNet)
+
 ## What is PolarNet?
 
 PolarNet is a lightweight neural network that aims to provide near-real-time online semantic segmentation for a single LiDAR scan. Unlike existing methods that require KNN to build a graph and/or 3D/graph convolution, we achieve fast inference speed by avoiding both of them. As shown below, we quantize points into grids using their polar coordinations. We then learn a fixed-length representation for each grid and feed them to a 2D neural network to produce point segmentation results.
