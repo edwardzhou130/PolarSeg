@@ -50,7 +50,7 @@ def main(args):
     model_save_path = args.model_save_path
     compression_model = args.grid_size[2]
     grid_size = args.grid_size
-    visibilty = args.visibilty
+    visibility = args.visibility
     pytorch_device = torch.device('cuda:0')
     model = args.model
     if model == 'polar':
@@ -91,7 +91,7 @@ def main(args):
 
 
     #prepare model
-    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding, use_vis_fea=visibilty)
+    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding, use_vis_fea=visibility)
     my_model = ptBEVnet(my_BEV_model, pt_model = 'pointnet', grid_size =  grid_size, fea_dim = fea_dim, max_pt_per_encode = 256, pt_pooling='max',
                             out_pt_fea_dim = 512, kernal_size = 1, pt_selection = 'random', fea_compre = compression_model)
     if os.path.exists(model_save_path):
@@ -127,7 +127,7 @@ def main(args):
                         val_grid_ten = [torch.from_numpy(i[:,:2]).to(pytorch_device) for i in val_grid]
                         val_label_tensor=val_vox_label.type(torch.LongTensor).to(pytorch_device)
 
-                        if visibilty:
+                        if visibility:
                             predict_labels = my_model(val_pt_fea_ten, val_grid_ten, val_vox_fea_ten)
                         else:
                             predict_labels = my_model(val_pt_fea_ten, val_grid_ten)
@@ -173,7 +173,7 @@ def main(args):
                 point_label_tensor=train_vox_label.type(torch.LongTensor).to(pytorch_device)
         
                 # forward + backward + optimize
-                if visibilty:
+                if visibility:
                     outputs = my_model(train_pt_fea_ten, train_grid_ten, train_vox_fea_ten)
                 else:
                     outputs = my_model(train_pt_fea_ten, train_grid_ten)
@@ -204,7 +204,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_batch_size', type=int, default=2, help='batch size for training (default: 2)')
     parser.add_argument('--val_batch_size', type=int, default=2, help='batch size for validation (default: 2)')
     parser.add_argument('--check_iter', type=int, default=6000, help='validation interval (default: 6000)')
-    parser.add_argument('--visibilty', action='store_true', help='use visibility feature')
+    parser.add_argument('--visibility', action='store_true', help='use visibility feature')
     
     args = parser.parse_args()
     if not len(args.grid_size) == 3:

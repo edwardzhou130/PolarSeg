@@ -53,7 +53,7 @@ def main(args):
     output_path = args.test_output_path
     compression_model = args.grid_size[2]
     grid_size = args.grid_size
-    visibilty = args.visibilty
+    visibility = args.visibility
     pytorch_device = torch.device('cuda:0')
     model = args.model
     if model == 'polar':
@@ -68,7 +68,7 @@ def main(args):
     unique_label=np.asarray([map_name_from_segmentation_class_to_segmentation_index[s] for s in unique_label_str]) - 1
 
     # prepare model
-    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding, use_vis_fea=visibilty)
+    my_BEV_model=BEV_Unet(n_class=len(unique_label), n_height = compression_model, input_batch_norm = True, dropout = 0.5, circular_padding = circular_padding, use_vis_fea=visibility)
     my_model = ptBEVnet(my_BEV_model, pt_model = 'pointnet', grid_size =  grid_size, fea_dim = fea_dim, max_pt_per_encode = 256,
                             out_pt_fea_dim = 512, kernal_size = 1, pt_selection = 'random', fea_compre = compression_model)
     if os.path.exists(model_save_path):
@@ -114,7 +114,7 @@ def main(args):
 
             torch.cuda.synchronize()
             start_time = time.time()
-            if visibilty:
+            if visibility:
                 predict_labels = my_model(val_pt_fea_ten, val_grid_ten, val_vox_fea_ten)
             else:
                 predict_labels = my_model(val_pt_fea_ten, val_grid_ten)
@@ -149,7 +149,7 @@ def main(args):
             test_pt_fea_ten = [torch.from_numpy(i).type(torch.FloatTensor).to(pytorch_device) for i in test_pt_fea]
             test_grid_ten = [torch.from_numpy(i[:,:2]).to(pytorch_device) for i in test_grid]
 
-            if visibilty:
+            if visibility:
                 predict_labels = my_model(test_pt_fea_ten,test_grid_ten,test_vox_fea_ten)
             else:
                 predict_labels = my_model(test_pt_fea_ten,test_grid_ten)
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--model', choices=['polar','traditional'], default='polar', help='training model: polar or traditional (default: polar)')
     parser.add_argument('-s', '--grid_size', nargs='+', type=int, default = [480,360,32], help='grid size of BEV representation (default: [480,360,32])')
     parser.add_argument('--test_batch_size', type=int, default=1, help='batch size for training (default: 1)')
-    parser.add_argument('--visibilty', action='store_true', help='use visibility feature')
+    parser.add_argument('--visibility', action='store_true', help='use visibility feature')
     
     args = parser.parse_args()
     if not len(args.grid_size) == 3:
